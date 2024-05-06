@@ -6,10 +6,17 @@ on:
 jobs:
   push_to_ghcr:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Build and tag image
-        run: |
-          COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
-          docker build --tag ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:$COMMIT_SHA .
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v5
+        env:
+          REGISTRY: ghcr.io
+          IMAGE_NAME: ${{ github.repository }}
+        with:
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
